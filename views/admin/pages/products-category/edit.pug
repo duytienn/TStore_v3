@@ -1,0 +1,154 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/select-tree.pug
+
+block main 
+
+    +alert-error()
+    +alert-success()
+
+    if(role.permissions.includes("product-category_edit"))
+        h1(class="mb-4") Chỉnh sửa danh mục sản phẩm
+
+        form(
+            action=`${prefixAdmin}/products-category/edit/${data.id}?_method=PATCH`
+            id="form-edit-product"
+            method="POST"
+            enctype="multipart/form-data"
+        )
+            div(class="form-group" style="width: 95%")
+                label(for="title") Tiêu đề
+                input(
+                    type="text"
+                    id="title"
+                    name="title"
+                    class="form-control"
+                    required
+                    value=data.title
+                ) 
+            div(class="form-group" style="width: 95%")
+                label(for="code") Mã danh mục
+                input(
+                    type="text"
+                    id="code"
+                    name="code"
+                    class="form-control"
+                    required
+                    value=data.code
+                )
+                small(class="form-text text-muted") 
+                    | Mã danh mục sẽ được tự động in hoa. 
+                    | Lưu ý: Thay đổi mã danh mục sẽ ảnh hưởng đến mã đầy đủ của tất cả danh mục con.
+            div(class="form-group" style="width: 95%")
+                label(for="paren_id") Danh mục cha
+                select(
+                    name="paren_id"
+                    id="paren_id"
+                    class="form-control"
+                    data-parent-code
+                )
+                    option(value="") -- Không có danh mục cha --
+                    +select-tree(records, data.paren_id)
+            div(class="form-group" style="width: 95%")
+                label(for="full_code_preview") Mã đầy đủ
+                input(
+                    type="text"
+                    id="full_code_preview"
+                    class="form-control"
+                    readonly
+                    disabled
+                    value=data.full_code
+                )
+                small(class="form-text text-muted") Mã đầy đủ sẽ được tự động tạo dựa trên mã danh mục cha (nếu có) và mã danh mục.
+            div(class="form-group" style="width: 95%")
+                labe(for="desc") Mô tả 
+                textarea(
+                    class="form-control tinymce-textarea"
+                    id="desc"
+                    name="description"
+                    rows="5"
+                    )= data.description
+
+
+            div(class="form-group" style="width: 95%")
+                label(for="thumbnail") Ảnh
+                input(
+                    type="file"
+                    class="form-control-file"
+                    id="thumbnail"
+                    name="thumbnail"
+                    accept="image/*"
+                    choose-img
+                    )
+                if(data.thumbnail)
+                    img(src=data.thumbnail, alt=data.title preview-img)
+                else
+                    img(src="", alt="your-image" preview-img)
+                div(remove-preview class=data.thumbnail ? "" : "hidden-remove") Bỏ chọn
+            div(class="form-group" style="width: 95%")
+                label(for="position") Vị trí
+                input(
+                    type="number"
+                    class="form-control"
+                    id="position"
+                    name="position"
+                    min="1"
+                    value=data.position
+                )
+            div(class="form-group form-check form-check-inline")
+                input(
+                    type="radio"
+                    class="form-check-input"
+                    id="statusActive"
+                    name="status"
+                    value="active"
+                    checked=(data.status == "active")
+                )
+                label(for="statusActive" class="form-check-label") Hoạt động
+            div(class="form-group form-check form-check-inline")
+                input(
+                    type="radio"
+                    class="form-check-input"
+                    id="statusInActive"
+                    name="status"
+                    value="inactive"
+                    checked=(data.status == "inactive") 
+                ) 
+                label(for="statusInActive" class="form-check-label") Dừng hoạt động
+            div(class="form-group")
+                button(
+                    type="submit"
+                    class="btn btn-primary"
+                ) Lưu lại
+
+        script(src="/admin/js/products.js")
+        script.
+            // JavaScript để xử lý hiển thị mã đầy đủ
+            document.addEventListener('DOMContentLoaded', function() {
+                const codeInput = document.getElementById('code');
+                const parentSelect = document.getElementById('paren_id');
+                const fullCodePreview = document.getElementById('full_code_preview');
+                
+                // Hàm cập nhật xem trước mã đầy đủ
+                function updateFullCodePreview() {
+                    const code = codeInput.value.toUpperCase();
+                    const parentId = parentSelect.value;
+                    
+                    if (parentId) {
+                        // Lấy text của option đang được chọn
+                        const selectedOption = parentSelect.options[parentSelect.selectedIndex];
+                        // Lấy mã danh mục cha từ data attribute (cần thêm vào option trong select-tree mixin)
+                        const parentCode = selectedOption.getAttribute('data-code') || '';
+                        fullCodePreview.value = parentCode + code;
+                    } else {
+                        fullCodePreview.value = code;
+                    }
+                }
+                
+                // Cập nhật khi thay đổi mã hoặc danh mục cha
+                codeInput.addEventListener('input', updateFullCodePreview);
+                parentSelect.addEventListener('change', updateFullCodePreview);
+                
+                // Cập nhật ban đầu
+                updateFullCodePreview();
+            });

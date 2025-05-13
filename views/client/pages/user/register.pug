@@ -1,0 +1,48 @@
+extends ../../layouts/auth.pug 
+include ../../mixins/alert.pug
+
+block main 
+    +alert-error()
+
+    .page-auth             
+        .auth-card
+            .column
+                h1 Đăng ký
+                p Sau khi đăng ký bạn sẽ được tự động đăng nhập!
+                form(
+                    action=`/user/register`
+                    method="POST"
+                )   
+                    .form-item
+                        input(
+                            type='text'
+                            class="form-element"
+                            placeholder='Họ và tên'
+                            id="fullName"
+                            name="fullName"
+                            required 
+                            )
+                    .form-item
+                        input(
+                            type='text'
+                            class="form-element"
+                            placeholder='Email'
+                            id="email"
+                            name="email"
+                            required 
+                            )
+                    .form-item
+                        input(
+                            type='password' 
+                            class="form-element"
+                            placeholder='Password'
+                            id="password"
+                            name="password"
+                            required
+                            )
+                    .flex-auth
+                        button(type='submit') Đăng ký
+            .column
+                h2 Chào mừng bạn!
+                p Nếu bạn đã có tài khoản, bạn có thể đăng nhập!
+                a(href='/user/login') Đăng nhập

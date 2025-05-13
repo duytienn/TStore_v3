@@ -1,0 +1,41 @@
+extends ../../layouts/auth.pug 
+include ../../mixins/alert.pug
+
+block main 
+    +alert-error()
+
+    .page-auth           
+        .auth-card
+            .column
+                h1 Nhập mã OTP 
+                p Bạn hãy vào Email và kiểm tra mã OTP đã gửi đến bạn!
+                form(
+                    action=`/user/password/otp`
+                    method="POST"
+                )   
+                    .form-item
+                        input(
+                            type='text'
+                            class="form-element"
+                            placeholder='Email'
+                            id="email"
+                            name="email"
+                            required 
+                            value=email
+                            readonly
+                            )
+                    .form-item
+                        input(
+                            type='text'
+                            class="form-element"
+                            placeholder='Mã OTP'
+                            id="otp"
+                            name="otp"
+                            required
+                            )
+                    .flex-auth
+                        button(type='submit') Xác nhận
+            .column
+                h2 Nếu bạn đã làm mất Email!
+                p Bạn có thể đăng ký một tài khoản khác!
+                a(href='/user/register') Đăng ký

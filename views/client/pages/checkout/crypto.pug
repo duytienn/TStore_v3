@@ -1,0 +1,94 @@
+extends ../../layouts/default.pug
+include ../../mixins/box-head.pug
+include ../../mixins/alert.pug
+
+block main
+  +alert-success()
+  +alert-error()
+
+  .container.my-3
+    .row
+      .col-12
+        +box-head("Đặt hàng")
+    .row
+      .col-12
+        table(class="table table-bordered")
+          thead
+            tr
+              th STT
+              th Ảnh
+              th Tên
+              th Giá
+              th Số lượng
+              th Tổng tiền
+          tbody
+            if(cart.products.length > 0)
+              each item, index in cart.products
+                tr
+                  td #{index + 1}
+                  td
+                    img(
+                      src=item.productInfo.thumbnail
+                      alt=item.productInfo.title
+                      width="80px"
+                    )
+                  td
+                    a(href=`/products/detail/${item.productInfo.slug}`) #{item.productInfo.title}
+                    // nếu có màu thì hiển thị
+                    if item.color
+                      small.d-block Màu: #{item.color}
+                    // nếu có bộ nhớ thì hiển thị
+                    if item.memory
+                      small.d-block Bộ nhớ: #{item.memory}GB
+                  td #{item.productInfo.newPrice.toLocaleString('vi-VN')} VNĐ
+                  td #{item.quantity}
+                  td #{item.totalPrice.toLocaleString('vi-VN')} VNĐ
+            else 
+              tr 
+                td(
+                  colspan="7"
+                  class="text-center"
+                ) Giỏ hàng trống
+        h3(class="text-right") Tổng đơn hàng : #{cart.totalPrice.toLocaleString('vi-VN')} VNĐ
+    .row
+      .col-12
+        +box-head("Thanh toán bằng Crypto")
+    .row
+      .col-md-6.offset-md-3
+        .card.p-4
+          h5 Số tiền đơn hàng: #{cart.totalPrice.toLocaleString('vi-VN')} VNĐ
+          // p Tỉ giá: 1 USDT = #{rate.toLocaleString('vi-VN')} VNĐ
+          p Số USDT cần gửi (≈): 
+             strong #{usdtAmount} USDT
+          hr
+          //- inputs để user chỉnh gas nếu muốn
+          .form-group
+            label(for="gasPrice") Gas Price (Gwei)
+            input#gasPrice.form-control(type="number" value="0.1" step="0.1")
+          .form-group
+            label(for="gasLimit") Gas Limit
+            input#gasLimit.form-control(type="number" value="100000")
+          
+          // Form thông tin đặt hàng
+          div#orderForm.mt-4
+            h5.mb-3 Thông tin nhận hàng
+            form#form-crypto-order
+              div.form-group
+                label(for="fullName") Họ tên
+                input.form-control#fullName(type="text" name="fullName" required)
+              div.form-group
+                label(for="phone") Số điện thoại
+                input.form-control#phone(type="text" name="phone" required)
+              div.form-group
+                label(for="address") Địa chỉ
+                input.form-control#address(type="text" name="address" required)
+          
+          button#sendCrypto.btn.btn-warning.btn-block.mt-3 Thanh toán bằng Crypto
+          //- hiển thị trạng thái giao dịch
+          div#cryptoStatus.mt-3
+
+block scripts
+  // load Web3.js từ CDN
+  script(src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.8.2/web3.min.js")
+  // script xử lý chuyển USDT
+  script(src="/js/checkout-crypto.js")

@@ -1,0 +1,306 @@
+extends ../../layouts/default.pug 
+include ../../mixins/box-head.pug
+include ../../mixins/alert.pug
+
+block main 
+
+    +alert-success()
+
+    //- Kiểm tra nếu product tồn tại
+    if (!product)
+        .product-not-available
+            .container.my-5
+                .row
+                    .col-12.text-center
+                        h2(class="text-danger") Sản phẩm đã ngừng kinh doanh
+                        p Sản phẩm này không còn tồn tại hoặc đã bị xóa khỏi hệ thống.
+                        a(href="/products" class="btn btn-primary mt-3") Quay lại danh sách sản phẩm
+    else
+        .product-detail 
+            .container.my-5 
+                .row 
+                    .col-6 
+                        .inner-thumb 
+                            img(src=product.thumbnail, alt=product.title)
+                    .col-6 
+                        h1(class="inner-tilte") #{product.title} 
+
+                        if (product.category)
+                            div(class="inner-category")
+                                span Danh mục : 
+                                a(href=`/products/${product.category.slug}`) #{product.category} 
+                        
+                        //- Kiểm tra variants tồn tại
+                        if (product.variants && product.variants.length > 0)
+                            div(class="product-variants mb-3")
+                                //- Màu sắc
+                                div(class="color-options mb-2")
+                                    label(class="mr-2") Màu sắc:
+                                    div.d-flex.flex-wrap
+                                        each v in uniqueVariants
+                                            button.btn.btn-sm.btn-outline-secondary.m-1.color-option(
+                                                type="button"
+                                                data-color=v.color
+                                            )= v.color
+
+                                //- Bộ nhớ
+                                div(class="memory-options mb-2")
+                                    label(class="mr-2") Bộ nhớ:
+                                    div(class="d-flex flex-wrap")
+                                        each m in uniqueMemories
+                                            button.btn.btn-sm.btn-outline-secondary.m-1.memory-option(
+                                                type="button"
+                                                data-memory=m
+                                            )
+                                                if m > 0
+                                                    = m + ' GB'
+                                                else
+                                                    | Không khả dụng
+
+                                                                
+                        div(class="inner-price")
+                            if (product.newPrice) 
+                                div(class="inner-price-new") 
+                                    h1 Giá : 
+                                    span #{product.newPrice.toLocaleString('vi-VN')} VNĐ
+
+                            if(product.price)
+                                div(class="inner-price-old") #{product.price.toLocaleString('vi-VN')} VNĐ
+
+                            if(product.discountPercentage)
+                                div(class="inner-percent")  -#{product.discountPercentage}%
+
+                        if(product.stock)
+                            div(class="inner-stock") 
+                                h1 Còn lại :
+                                <span>#{product.stock} Sản phẩm</span>
+
+                        form(
+                            action=`/cart/add/${product.id}`
+                            method="POST"
+                        )   
+                            label(for="") Số lượng :
+                            input(
+                                class="form-control"
+                                type="number"
+                                name="quantity"
+                                value="1"
+                                min="1"
+                                max=product.stock
+                            )
+                            button(
+                                type="submit"
+                                class="btn btn-success btn-block"
+                            ) THÊM VÀO GIỎ
+        hr
+
+        .product-desc
+            .container.my-5
+                .row 
+                    .col-12 
+                        +box-head("Mô tả sản phẩm")
+                        hr
+                        .inner-desc !{product.description}
+
+        hr
+        .comment-product 
+            .container
+                .row 
+                    .col-12 
+                        +box-head("Bình luận và đánh giá")
+
+                        if (user)
+                            div(class="comment-section")
+                                form#commentForm(class="comment-form")
+                                    textarea#commentInput(
+                                        class="tinymce-textarea"
+                                        name="comment" type="text" placeholder="Viết bình luận của bạn tại đây..."
+                                        )
+                                    button(type="submit") Bình luận
+
+                                div(id="commentList" class="comment-list")
+                                    each comment in comments
+                                        div(class="comment-item")
+                                            div(class="comment-author") 
+                                                b #{comment.infoUser.fullName}
+                                            div(class="comment-text") 
+                                                b !{comment.content}
+                        else 
+                            div(class="comment-section")
+                                h4 Bạn cần phải đăng nhập trước khi muốn bình luận!
+
+                                div(id="commentList" class="comment-list")
+                                    each comment in comments
+                                        div(class="comment-item")
+                                            div(class="comment-author") 
+                                                b #{comment.infoUser.fullName}
+                                            div(class="comment-text") 
+                                                b !{comment.content}
+
+                
+        block script 
+            script(type="module" src="/js/comment.js")
+
+            //- Chỉ chạy script này nếu có product và có variants
+            if (product && product.variants && product.variants.length > 0)
+                script.
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Các biến thể sản phẩm
+                        const variants = !{JSON.stringify(product.variants || [])};
+                        
+                        // Mặc định chọn biến thể đầu tiên
+                        let selectedColor = variants.length > 0 ? variants[0].color : null;
+                        let selectedMemory = variants.length > 0 ? variants[0].memory : null;
+                        
+                        // Các phần tử DOM
+                        const colorButtons = document.querySelectorAll('.color-option');
+                        const memoryButtons = document.querySelectorAll('.memory-option');
+                        const priceElement = document.querySelector('.inner-price-new span');
+                        const oldPriceElement = document.querySelector('.inner-price-old');
+                        const discountElement = document.querySelector('.inner-percent');
+                        const stockElement = document.querySelector('.inner-stock span');
+                        const productImage = document.querySelector('.inner-thumb img');
+                        
+                        // Hàm cập nhật UI dựa trên biến thể đã chọn
+                        function updateProductInfo() {
+                            const selectedVariant = variants.find(v => 
+                                v.color === selectedColor && v.memory === selectedMemory);
+                            
+                            if (selectedVariant) {
+                                // Cập nhật giá
+                                if (priceElement) {
+                                    const discountedPrice = selectedVariant.price * (1 - selectedVariant.discountPercentage / 100);
+                                    priceElement.textContent = `${Math.round(discountedPrice).toLocaleString('vi-VN')} VNĐ`;
+                                }
+                                
+                                if (oldPriceElement) {
+                                    oldPriceElement.textContent = `${selectedVariant.price.toLocaleString('vi-VN')} VNĐ`;
+                                }
+                                
+                                if (discountElement) {
+                                    discountElement.textContent = `-${selectedVariant.discountPercentage}%`;
+                                }
+                                
+                                // Cập nhật số lượng tồn kho
+                                if (stockElement) {
+                                    stockElement.textContent = `${selectedVariant.stock} Sản phẩm`;
+                                }
+                                
+                                // Cập nhật ảnh nếu có
+                                if (selectedVariant.thumbnail && productImage) {
+                                    productImage.src = selectedVariant.thumbnail;
+                                }
+                                
+                                // Cập nhật giới hạn số lượng đặt hàng
+                                const quantityInput = document.querySelector('input[name="quantity"]');
+                                if (quantityInput) {
+                                    quantityInput.max = selectedVariant.stock;
+                                    if (parseInt(quantityInput.value) > selectedVariant.stock) {
+                                        quantityInput.value = selectedVariant.stock;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Xử lý sự kiện click cho nút màu sắc
+                        colorButtons.forEach(button => {
+                            button.addEventListener('click', function() {
+                                // Bỏ chọn tất cả các nút màu
+                                colorButtons.forEach(btn => btn.classList.remove('active', 'btn-primary'));
+                                
+                                // Đánh dấu nút được chọn
+                                this.classList.add('active', 'btn-primary');
+                                selectedColor = this.getAttribute('data-color');
+                                
+                                // Cập nhật các tùy chọn bộ nhớ dựa trên màu đã chọn
+                                updateMemoryOptions();
+                                
+                                // Cập nhật thông tin sản phẩm
+                                updateProductInfo();
+                            });
+                        });
+                        
+                        // Xử lý sự kiện click cho nút bộ nhớ
+                        memoryButtons.forEach(button => {
+                            button.addEventListener('click', function() {
+                                // Bỏ chọn tất cả các nút bộ nhớ
+                                memoryButtons.forEach(btn => btn.classList.remove('active', 'btn-primary'));
+                                
+                                // Đánh dấu nút được chọn
+                                this.classList.add('active', 'btn-primary');
+                                selectedMemory = parseInt(this.getAttribute('data-memory'));
+                                
+                                // Cập nhật thông tin sản phẩm
+                                updateProductInfo();
+                            });
+                        });
+                        
+                        // Cập nhật tùy chọn bộ nhớ dựa trên màu đã chọn
+                        function updateMemoryOptions() {
+                            // Lọc các tùy chọn bộ nhớ có sẵn cho màu đã chọn
+                            const availableMemories = variants
+                                .filter(v => v.color === selectedColor)
+                                .map(v => v.memory);
+                            
+                            // Cập nhật hiển thị các nút bộ nhớ
+                            memoryButtons.forEach(button => {
+                                const memory = parseInt(button.getAttribute('data-memory'));
+                                if (availableMemories.includes(memory)) {
+                                    button.style.display = 'inline-block';
+                                    // Nếu bộ nhớ hiện tại không có sẵn cho màu đã chọn, chọn bộ nhớ đầu tiên có sẵn
+                                    if (!availableMemories.includes(selectedMemory)) {
+                                        if (memory === availableMemories[0]) {
+                                            selectedMemory = memory;
+                                            button.classList.add('active', 'btn-primary');
+                                        }
+                                    }
+                                } else {
+                                    button.style.display = 'none';
+                                    button.classList.remove('active', 'btn-primary');
+                                }
+                            });
+                        }
+                        
+                        // Thêm vào form để gửi thông tin biến thể khi thêm vào giỏ hàng
+                        const addToCartForm = document.querySelector('form[action^="/cart/add/"]');
+                        if (addToCartForm) {
+                            // Sửa đoạn xử lý form trong đoạn script cuối trang
+                            addToCartForm.addEventListener('submit', function(e) {
+                                // Tìm biến thể đã chọn
+                                const selectedVariant = variants.find(v => 
+                                    v.color === selectedColor && v.memory === selectedMemory);
+                                    
+                                // Xóa các input ẩn cũ nếu có
+                                const existingColorInput = this.querySelector('input[name="color"]');
+                                const existingMemoryInput = this.querySelector('input[name="memory"]');
+                                
+                                if (existingColorInput) existingColorInput.remove();
+                                if (existingMemoryInput) existingMemoryInput.remove();
+                                
+                                // Thêm input ẩn cho màu sắc và bộ nhớ
+                                const colorInput = document.createElement('input');
+                                colorInput.type = 'hidden';
+                                colorInput.name = 'color';
+                                colorInput.value = selectedColor;
+                                
+                                const memoryInput = document.createElement('input');
+                                memoryInput.type = 'hidden';
+                                memoryInput.name = 'memory';
+                                memoryInput.value = selectedMemory;
+                                
+                                this.appendChild(colorInput);
+                                this.appendChild(memoryInput);
+                            });
+                        }
+                        
+                        // Mặc định chọn tùy chọn đầu tiên
+                        if (colorButtons.length > 0) {
+                            colorButtons[0].classList.add('active', 'btn-primary');
+                        }
+                        if (memoryButtons.length > 0) {
+                            memoryButtons[0].classList.add('active', 'btn-primary');
+                        }
+                        
+                        // Khởi tạo ban đầu
+                        updateProductInfo();
+                    });

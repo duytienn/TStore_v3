@@ -1,0 +1,48 @@
+extends ../../layouts/auth.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-error()
+                
+    .page-auth          
+        .auth-card
+            .column
+                h1 Đăng nhập
+                p Sau khi đăng nhập bạn sẽ có những trải nghiệm tốt nhất!
+                form(
+                    action=`/user/login`
+                    method="POST"
+                )
+                    .form-item
+                        input(
+                            type='text'
+                            class="form-element"
+                            placeholder='Email'
+                            id="email"
+                            name="email"
+                            required 
+                            )
+                    .form-item
+                        input(
+                            type='password' 
+                            class="form-element"
+                            placeholder='Password'
+                            id="password"
+                            name="password"
+                            required
+                            )
+                    .flex-auth
+                        button(type='submit') Đăng nhập
+                        a(href='/user/password/forgot') Quên mật khẩu
+                    p(style='margin-top:3rem;margin-bottom:1.5rem;') Đăng nhập bằng phương thức khác
+                    .social-buttons
+                        a.facebook(href='')
+                            i.fa-brands.fa-facebook
+                        a.twitter(href='')
+                            i.fa-brands.fa-twitter
+                        a.github(href='')
+                            i.fa-brands.fa-github
+            .column
+                h2 Chào mừng bạn!
+                p Nếu bạn chưa có tài khoản, vui lòng đăng ký!
+                a(href='/user/register') Đăng ký

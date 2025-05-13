@@ -1,0 +1,69 @@
+extends ../../layouts/default.pug 
+include ../../mixins/box-head.pug 
+
+block main 
+    .container.my-3 
+
+        include ../../partials/list-button-user.pug
+        .row 
+            .col-12 
+                +box-head("Chat")
+
+
+        
+        .chatbot
+            header 
+                h2 Chat
+            ul(
+                class="chatbox"
+                my-id=user.id
+            )
+                each chat of chats 
+                    
+                    if(user.id != chat.user_id)
+                        li(class="chat incoming")
+                            div(class="inner-name")
+                                b #{chat.infoUser.fullName}
+                            if(chat.content)
+                                div(class="inner-content")
+                                    p #{chat.content}
+                            if(chat.images.length > 0)
+                                div(class="inner-images")
+                                    each image in chat.images 
+                                        img(src=image)
+                    else
+                        li(class="chat outgoing")
+                            if(chat.content != "")
+                                div(class="inner-content")
+                                    p #{chat.content}
+                            if(chat.images.length > 0)
+                                div(class="inner-images")
+                                    each image in chat.images 
+                                        img(src=image)
+                li(class="chat typing")
+            .upload-image 
+                div(class="custom-file-container" data-upload-id="upload-img")
+
+            .chat-input 
+                form(
+                    action=""
+                    class="inner-form"
+                )
+                    input(
+                        placeholder="Nhập nội dung ..." 
+                        type="text"
+                        name="content"
+                    )
+                    label(
+                        for="file-upload-with-preview-upload-img"
+                    ) <i class="fa-solid fa-image"></i>
+                    
+                    .button-emo
+                        <i class="fa-solid fa-icons"></i>
+                    button
+                        i(class="fa-regular fa-paper-plane")
+    div(class="tooltip" role="tooltip")
+        emoji-picker
+    
+    block script 
+        script(type="module" src="/js/chat.js") 

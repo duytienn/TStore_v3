@@ -1,0 +1,31 @@
+extends ../../layouts/default.pug 
+include ../../mixins/box-head.pug
+
+block main 
+    .container.my-3 
+        .row 
+            .col-12 
+                +box-head(pageTitle)
+
+    .customer-info-container
+        .user-image
+            img(src="/images/avatar.jfif" alt="User Image")
+        .user-details
+            label(for="name") Họ và tên:
+            input#name(type="text" name="name" value=user.fullName )
+
+            label Giới tính:
+            .gender-options
+                input#male(type="radio" name="gender" value="male" checked)
+                label(for="male") Nam
+                input#female(type="radio" name="gender" value="female")
+                label(for="female") Nữ
+
+            label(for="email") Email:
+            input#email(type="email" name="email" value=user.email)
+
+            label(for="phone") Số điện thoại:
+            input#phone(type="tel" name="phone" value="0334367421")
+
+            label(for="dob") Ngày sinh:
+            input#dob(type="date" name="dob")

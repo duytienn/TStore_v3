@@ -1,0 +1,36 @@
+div.gradient
+  div.subscription
+    h2.subscription__title Hãy cập nhật thông tin với chúng tôi
+    p.subscription__description 
+      | Đăng ký để nhận thông tin chi tiết và cập nhật từ sản phẩm của chúng tôi.
+      | Giữ kết nối và khám phá những sản phẩm mới sớm nhất.
+    form.subscription__form
+      input.subscription__input(type="email" placeholder="Nhập email...")
+      button.subscription__button(type="submit") Đăng ký
+
+  footer.footer
+    div.footer-links
+      div.footer__branding
+        p.footer__brand-name
+          a(href="/") 
+            img(src=settingGeneral.logo, alt="inner-logo")
+
+      div.footer__column
+        a.footer__link(href="#")  Hotline: #{settingGeneral.phone}
+        a.footer__link(href="#")  Email: #{settingGeneral.email}
+        a.footer__link(href="#")  Địa chỉ: #{settingGeneral.address}
+
+      div.footer__column
+        a.footer__link(href="#") Điều khoản sử dụng
+        a.footer__link(href="#") Chính sách hoàn trả
+        a.footer__link(href="#") Quy định bảo hành
+
+      div.footer__column
+        a.footer__link(href="#")
+          i.fa-brands.fa-youtube
+        a.footer__link(href="#")
+          i.fa-brands.fa-github
+        a.footer__link(href="#")
+          i.fa-brands.fa-facebook
+
+    p.footer__copyright Copyright 2025 © #{settingGeneral.copyright}

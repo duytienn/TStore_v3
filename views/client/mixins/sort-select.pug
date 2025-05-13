@@ -1,0 +1,10 @@
+mixin sort-select()
+    div(sort)
+        select(
+            name="sort"
+            class="form-control"
+            sort-select
+            ) 
+            option(disabled selected) ---------- Sắp xếp theo lựa chọn ----------
+            option(value="price-desc") Giá giảm dần
+            option(value="price-asc") Giá tăng dần

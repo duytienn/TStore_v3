@@ -1,0 +1,8 @@
+mixin search(keyword)
+    form(class="form-inline" id="form-search")
+        .form-group.mb-2
+            input(
+                type="text", placeholder='Nhập từ khóa',class="form-control", id="inputPassword2",name="keyword",
+                value= `${keyword}`
+                )
+            button.btn.btn-primary.ml(class="btn btn-primary ml-1", type='submit') Tìm kiếm

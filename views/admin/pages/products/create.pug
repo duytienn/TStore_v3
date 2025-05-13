@@ -1,0 +1,430 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/select-tree.pug
+
+block main 
+
+    +alert-error()
+
+    h1(class="mb-4") Thêm mới sản phẩm 
+
+    form(
+        action=`${prefixAdmin}/products/create`
+        id="form-create-product"
+        method="POST"
+        enctype="multipart/form-data"
+    )
+        div(class="form-group" style="width: 95%")
+            label(for="title") Tiêu đề
+            input(
+                type="text"
+                id="title"
+                name="title"
+                class="form-control"
+                required
+            ) 
+        div(class="form-group" style="width: 95%")
+            label(for="products_category_id") Chọn danh mục
+            select(
+                name="products_category_id"
+                id="products_category_id"
+                class="form-control"
+                data-category-code
+            )
+                option(disabled selected) -- Chọn danh mục --
+                +select-tree(records)
+        div(class="form-group" style="width: 95%")
+            label(for="code") Mã sản phẩm
+            input(
+                type="text"
+                id="code"
+                name="code"
+                class="form-control"
+                placeholder="Nhập mã sản phẩm (ví dụ: XS)"
+                required
+            )
+            small(class="form-text text-muted") Mã sản phẩm sẽ được tự động in hoa.
+        div(class="form-group" style="width: 95%")
+            label(for="full_code_preview") Mã đầy đủ
+            input(
+                type="text"
+                id="full_code_preview"
+                class="form-control"
+                readonly
+                disabled
+            )
+            small(class="form-text text-muted") Mã đầy đủ sẽ được tự động tạo dựa trên mã danh mục và mã sản phẩm.
+        div(class="form-group form-check form-check-inline")
+            input(
+                type="radio"
+                class="form-check-input"
+                id="featured1"
+                name="featured"
+                value="1"
+            )
+            label(for="featured1" class="form-check-label") Nổi bật
+        div(class="form-group form-check form-check-inline")
+            input(
+                type="radio"
+                class="form-check-input"
+                id="featured0"
+                name="featured"
+                value="0"
+            ) 
+            label(for="featured0" class="form-check-label") Không
+        div(class="form-group" style="width: 95%")
+            labe(for="desc") Mô tả 
+            textarea(
+                class="form-control tinymce-textarea"
+                id="desc"
+                name="description"
+                rows="5"
+                ) 
+        div(class="form-group" style="width: 95%")
+            label(for="price") Gía
+            input(
+                type="number"
+                id="price"
+                class="form-control"
+                name="price"
+                min="0"
+                value="0"
+                )
+
+        div(class="form-group" style="width: 95%")
+            label(for="discount") % Giảm Gía
+            input(
+                type="number"
+                id="discount"
+                class="form-control"
+                name="discountPercentage"
+                min="0"
+                value="0"
+                )
+        
+        div(class="form-group" style="width: 95%")
+            label(for="stock") Số lượng 
+                input(
+                    type="number"
+                    id="stock"
+                    class="form-control"
+                    name="stock"
+                    value="0"
+                    min="0"
+                )
+        div(class="form-group" style="width: 95%")
+            label(for="thumbnail") Ảnh
+            input(
+                type="file"
+                class="form-control-file"
+                id="thumbnail"
+                name="thumbnail"
+                accept="image/*"
+                choose-img
+                )
+            img(src="", alt="your-image" preview-img)
+            div(remove-preview class="hidden-remove") Bỏ chọn
+        div(class="form-group" style="width: 95%")
+            label(for="position") Vị trí
+            input(
+                type="number"
+                class="form-control"
+                id="position"
+                name="position"
+                placeholder="Tự động tăng"
+                min="1"
+            )
+        div(class="form-group form-check form-check-inline")
+            input(
+                type="radio"
+                class="form-check-input"
+                id="statusActive"
+                name="status"
+                value="active"
+                checked
+            )
+            label(for="statusActive" class="form-check-label") Hoạt động
+        div(class="form-group form-check form-check-inline")
+            input(
+                type="radio"
+                class="form-check-input"
+                id="statusInActive"
+                name="status"
+                value="inactive"
+            ) 
+            label(for="statusInActive" class="form-check-label") Dừng hoạt động
+        
+        
+        // Thêm vào form trước phần button submit
+        div(class="form-group" style="width: 95%")
+            h3 Biến thể sản phẩm
+            div(class="variants-container mb-3")
+                h4 Màu sắc
+                div(class="colors-container d-flex flex-wrap mb-2")
+                    div(class="input-group mb-2 mr-2" style="width: 200px")
+                        input(type="text" class="form-control color-input" placeholder="Nhập màu")
+                        div(class="input-group-append")
+                            button(class="btn btn-outline-secondary add-color" type="button") +
+                div(class="colors-list d-flex flex-wrap mb-3")
+                    // Colors will be added here dynamically
+                
+                h4 Bộ nhớ (GB)
+                div(class="memories-container d-flex flex-wrap mb-2")
+                    div(class="input-group mb-2 mr-2" style="width: 200px")
+                        input(type="number" class="form-control memory-input" placeholder="Nhập GB" min="1")
+                        div(class="input-group-append")
+                            button(class="btn btn-outline-secondary add-memory" type="button") +
+                div(class="memories-list d-flex flex-wrap mb-3")
+                    // Memories will be added here dynamically
+                
+                h4 Bảng giá theo biến thể
+                div(class="table-responsive")
+                    table(class="table table-bordered variant-table")
+                        thead
+                            tr
+                                th Màu sắc
+                                th Bộ nhớ (GB)
+                                th Giá
+                                th % Giảm giá
+                                th Số lượng
+                        tbody
+                            // Variants will be added here dynamically
+
+
+        div(class="form-group")
+            button(
+                type="submit"
+                class="btn btn-primary"
+            ) Tạo mới
+
+    script(src="/admin/js/products.js")
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- CODE PREVIEW FUNCTIONALITY ---
+            const codeInput = document.getElementById('code');
+            const categorySelect = document.getElementById('products_category_id');
+            const fullCodePreview = document.getElementById('full_code_preview');
+            
+            // Hàm cập nhật xem trước mã đầy đủ
+            function updateFullCodePreview() {
+                const code = codeInput.value.toUpperCase();
+                const categoryId = categorySelect.value;
+                
+                if (categoryId) {
+                    // Lấy text của option đang được chọn
+                    const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+                    // Lấy mã danh mục từ data attribute (cần thêm vào option trong select-tree mixin)
+                    const categoryCode = selectedOption.getAttribute('data-code') || '';
+                    fullCodePreview.value = categoryCode + code;
+                } else {
+                    fullCodePreview.value = code;
+                }
+            }
+            
+            // Cập nhật khi thay đổi mã hoặc danh mục
+            if (codeInput) {
+                codeInput.addEventListener('input', updateFullCodePreview);
+                
+                // Xử lý chuyển đổi mã thành chữ hoa
+                codeInput.addEventListener('blur', function() {
+                    this.value = this.value.toUpperCase();
+                    updateFullCodePreview();
+                });
+            }
+            
+            if (categorySelect) {
+                categorySelect.addEventListener('change', updateFullCodePreview);
+            }
+            
+            // Cập nhật ban đầu nếu các phần tử tồn tại
+            if (codeInput && fullCodePreview) {
+                updateFullCodePreview();
+            }
+
+            // --- VARIANT MANAGEMENT FUNCTIONALITY ---
+            const colorsContainer = document.querySelector('.colors-container');
+            const memoriesContainer = document.querySelector('.memories-container');
+            const colorsList = document.querySelector('.colors-list');
+            const memoriesList = document.querySelector('.memories-list');
+            const variantTable = document.querySelector('.variant-table tbody');
+            const addColorBtn = document.querySelector('.add-color');
+            const addMemoryBtn = document.querySelector('.add-memory');
+            const colorInput = document.querySelector('.color-input');
+            const memoryInput = document.querySelector('.memory-input');
+            
+            const colors = [];
+            const memories = [];
+            
+            // Thêm màu
+            if (addColorBtn && colorInput) {
+                addColorBtn.addEventListener('click', function() {
+                    const color = colorInput.value.trim();
+                    if (color && !colors.includes(color)) {
+                        colors.push(color);
+                        updateColorsList();
+                        updateVariantTable();
+                        colorInput.value = '';
+                    }
+                });
+            }
+            
+            // Thêm bộ nhớ
+            if (addMemoryBtn && memoryInput) {
+                addMemoryBtn.addEventListener('click', function() {
+                    const memory = parseInt(memoryInput.value);
+                    if (memory > 0 && !memories.includes(memory)) {
+                        memories.push(memory);
+                        updateMemoriesList();
+                        updateVariantTable();
+                        memoryInput.value = '';
+                    }
+                });
+            }
+            
+            // Cập nhật danh sách màu
+            function updateColorsList() {
+                if (!colorsList) return;
+                
+                colorsList.innerHTML = '';
+                colors.forEach((color, index) => {
+                    const badge = document.createElement('div');
+                    badge.className = 'badge badge-primary mr-2 mb-2 p-2';
+                    badge.innerHTML = `${color} <span class="remove-color" data-index="${index}">&times;</span>`;
+                    colorsList.appendChild(badge);
+                });
+                
+                // Thêm sự kiện xóa màu
+                document.querySelectorAll('.remove-color').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        colors.splice(index, 1);
+                        updateColorsList();
+                        updateVariantTable();
+                    });
+                });
+                updateMainFields();
+            }
+            
+            // Cập nhật danh sách bộ nhớ
+            function updateMemoriesList() {
+                if (!memoriesList) return;
+                
+                memoriesList.innerHTML = '';
+                memories.sort((a, b) => a - b).forEach((memory, index) => {
+                    const badge = document.createElement('div');
+                    badge.className = 'badge badge-info mr-2 mb-2 p-2';
+                    badge.innerHTML = `${memory}GB <span class="remove-memory" data-index="${index}">&times;</span>`;
+                    memoriesList.appendChild(badge);
+                });
+                
+                // Thêm sự kiện xóa bộ nhớ
+                document.querySelectorAll('.remove-memory').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        memories.splice(index, 1);
+                        updateMemoriesList();
+                        updateVariantTable();
+                    });
+                });
+                updateMainFields();
+            }
+            
+            // Cập nhật bảng biến thể
+            function updateVariantTable() {
+                if (!variantTable) return;
+                
+                variantTable.innerHTML = '';
+                
+                if (colors.length > 0 && memories.length > 0) {
+                    colors.forEach(color => {
+                        memories.sort((a, b) => a - b).forEach(memory => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${color}<input type="hidden" name="variantColors" value="${color}"></td>
+                                <td>${memory}GB<input type="hidden" name="variantMemories" value="${memory}"></td>
+                                <td><input type="number" class="form-control" name="variantPrices" min="0" value="${document.getElementById('price')?.value || 0}"></td>
+                                <td><input type="number" class="form-control" name="variantDiscounts" min="0" max="100" value="${document.getElementById('discount')?.value || 0}"></td>
+                                <td><input type="number" class="form-control" name="variantStocks" min="0" value="${document.getElementById('stock')?.value || 0}"></td>
+                            `;
+                            variantTable.appendChild(row);
+                        });
+                    });
+                }
+                updateMainFields();
+            }
+            
+            // Thêm vào phần script ở cuối file create.pug
+            function updateMainFields() {
+            const hasVariants = colors.length > 0 && memories.length > 0;
+            const priceField = document.getElementById('price');
+            const discountField = document.getElementById('discount');
+            const stockField = document.getElementById('stock');
+            
+            if (hasVariants) {
+                // Nếu có biến thể, vô hiệu hóa các trường chính
+                if (priceField) {
+                priceField.disabled = true;
+                priceField.parentElement.classList.add('text-muted');
+                priceField.parentElement.insertAdjacentHTML('beforeend', 
+                    '<small class="form-text text-info">Giá sẽ được tính tự động từ giá thấp nhất của các biến thể</small>');
+                }
+                
+                if (discountField) {
+                discountField.disabled = true;
+                discountField.parentElement.classList.add('text-muted');
+                discountField.parentElement.insertAdjacentHTML('beforeend', 
+                    '<small class="form-text text-info">% Giảm giá sẽ được tính trung bình từ các biến thể</small>');
+                }
+                
+                if (stockField) {
+                stockField.disabled = true;
+                stockField.parentElement.classList.add('text-muted');
+                stockField.parentElement.insertAdjacentHTML('beforeend', 
+                    '<small class="form-text text-info">Số lượng sẽ được tính tổng từ các biến thể</small>');
+                }
+            } else {
+                // Nếu không có biến thể, kích hoạt lại các trường chính
+                if (priceField) {
+                priceField.disabled = false;
+                priceField.parentElement.classList.remove('text-muted');
+                const infoText = priceField.parentElement.querySelector('.text-info');
+                if (infoText) infoText.remove();
+                }
+                
+                if (discountField) {
+                discountField.disabled = false;
+                discountField.parentElement.classList.remove('text-muted');
+                const infoText = discountField.parentElement.querySelector('.text-info');
+                if (infoText) infoText.remove();
+                }
+                
+                if (stockField) {
+                stockField.disabled = false;
+                stockField.parentElement.classList.remove('text-muted');
+                const infoText = stockField.parentElement.querySelector('.text-info');
+                if (infoText) infoText.remove();
+                }
+            }
+            }
+
+            // Theo dõi thay đổi trong các trường giá, giảm giá và tồn kho chính
+            ['price', 'discount', 'stock'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', function() {
+                        updateVariantTable();
+                    });
+                }
+            });
+            // Thêm vào cuối phần script trong create.pug
+            const form = document.getElementById('form-create-product');
+            if (form) {
+            form.addEventListener('submit', function(event) {
+                // Bỏ disabled tạm thời để có thể gửi giá trị
+                const disabledFields = this.querySelectorAll('input:disabled');
+                disabledFields.forEach(field => {
+                field.disabled = false;
+                });
+            });
+            }
+        });

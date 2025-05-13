@@ -1,0 +1,18 @@
+extends ../../layouts/default.pug 
+include ../../mixins/box-head.pug
+include ../../mixins/alert.pug
+
+block main 
+    .container.my-5 
+        .row 
+            .col-12 
+                +box-head("Sản phẩm đã ngừng kinh doanh")
+                hr
+                .discontinued-product 
+                    .alert.alert-warning.text-center 
+                        i.fa.fa-exclamation-triangle.mr-2
+                        | Sản phẩm bạn đang tìm kiếm hiện đã ngừng kinh doanh hoặc không tồn tại.
+                    
+                    p.text-center Vui lòng quay lại
+                        a.btn.btn-primary.ml-2(href="/products") danh sách sản phẩm
+                        |  để tìm sản phẩm khác.

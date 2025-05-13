@@ -1,0 +1,35 @@
+extends ../../layouts/default.pug 
+include ../../mixins/box-head.pug 
+
+block main 
+    .container.my-3 
+        .row 
+            .col-12 
+                +box-head("CHAT GPT")
+    .container.text-center
+        h2 Hãy đặt câu hỏi mà bạn muốn !
+    .container.my-3 
+        .row 
+            .col-12
+                .chat-gpt
+                    #app
+                        #chat_container
+                            //- .wrapper
+                            //-     .chat
+                            //-         .profile
+                            //-             img(src="/images/user.svg" alt="user")
+                            //-         .message Hello, how are you?
+
+                            //- .wrapper.ai
+                            //-     .chat
+                            //-         .profile
+                            //-             img(src="/images/bot.svg" alt="bot")
+                            //-         .message I'm fine, thank you! How can I assist you today?
+
+                        form.formGpt
+                            textarea(name="prompt" rows="1" cols="1" placeholder="Mời bạn đặt câu hỏi...")
+                            button(type="submit")
+                                img(src="images/send.svg" alt="send")
+    
+    block script 
+        script(type="module" src="/js/chatgpt.js")

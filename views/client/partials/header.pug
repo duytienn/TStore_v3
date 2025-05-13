@@ -1,0 +1,60 @@
+include ../mixins/sub-menu.pug
+
+header.header 
+    .container 
+        .row.align-items-center 
+            .col-1
+                .inner-logo 
+                    a(
+                        href="/"
+                        id="inner-logo"
+                    )
+                        img(src=settingGeneral.logo, alt="logo")
+            
+            .col-4.search-form
+                form(
+                    action="/search"
+                    method="GET"
+                )
+                    div(class="form-group d-flex mb-0")
+                        input(
+                            type="text"
+                            placeholder="Nhập nội dung tìm kiếm..."
+                            class="form-control"
+                            name="keyword"
+                            value=keyword
+                        )
+                        button(
+                            type="submit"
+                            class="btn btn-primary"
+                        ) <i class="fa-solid fa-magnifying-glass"></i>
+
+            .col-7
+                .inner-menu 
+                    ul 
+                        li(class="sub-menu") 
+                            -const pathProduct = "/products"
+                            a(href=pathProduct) SẢN PHẨM
+                            +sub-menu(layoutsProductsCategory, pathProduct)
+                        
+                        if(user)
+                            li
+                                a(href="/users/friends") BẠN BÈ
+                            //- li 
+                            //-     a(href="/rooms-chat") PHÒNG CHAT
+                            li 
+                                a(href="/chat-gpt") CHATGPT
+                            li.user-profile 
+                                a(href="/user/info")  <i class="fa-regular fa-user"></i>#{user.fullName}
+                            li.logout
+                                a(href="/user/logout")  ĐĂNG XUẤT
+                        else
+                            li.register
+                                a(href="/user/register") ĐĂNG KÝ
+                            li.login
+                                a(href="/user/login") ĐĂNG NHẬP
+                        li 
+                            li
+                                a(href="/cart")
+                                    i(class="fa-solid fa-cart-shopping")
+                                    | (#{miniCart && miniCart.totalQuantity ? miniCart.totalQuantity : "0"})

@@ -1,0 +1,51 @@
+extends ../../layouts/default.pug
+
+block main 
+    if (product.title)
+        h1(class="mb-4")  #{product.title}
+    
+    if (product.full_code || product.code)
+        div(class="mb-4") Mã sản phẩm: <b>#{product.full_code || product.code}</b>
+    
+    if (product.price)
+        div(class="mb-4") Giá: <b>#{product.price.toLocaleString('vi-VN')} VNĐ</b>
+
+    if (product.discountPercentage)
+        div(class="mb-4") Giảm giá : <b>#{product.discountPercentage}%</b>
+    
+    if (product.stock)
+        div(class="mb-4") Còn lại : <b>#{product.stock} sản phẩm</b>
+    
+    if (product.sold)
+        div(class="mb-4") Đã bán : <b>#{product.sold} sản phẩm</b>
+
+    if (product.thumbnail)
+        div(class="mb-4")
+            img(
+                src=product.thumbnail,
+                style="width : 100px"
+            )
+
+    if (product.status)
+        div(class="mb-4")
+            span Trạng thái : 
+            if (product.status == "active")
+                span(class="badge badge-success") Hoạt động
+            else 
+                span(class="badge badge-danger") Dừng hoạt động
+
+    //- if (product.position)
+    //-     div(class="mb-4") Vị trí : <b>#{product.position}</b>
+
+    if (product.description)
+        div.mb-4!= product.description
+
+
+    a(  
+        href=`${prefixAdmin}/products/edit/${product.id}`
+        class="btn btn-danger btn-sm"
+        type='button'
+    ) Sửa
+
+    script(src="/admin/js/tinymce-config.js") 
+    script(src="/admin/js/products.js")

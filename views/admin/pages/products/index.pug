@@ -1,0 +1,143 @@
+extends ../../layouts/default.pug
+include ../../mixins/button-status.pug
+include ../../mixins/search.pug
+include ../../mixins/button-navigation.pug
+include ../../mixins/form-change-multi.pug
+include ../../mixins/alert.pug
+include ../../mixins/sort-select.pug
+include ../../mixins/moment.pug
+
+block main 
+
+    +alert-success()
+
+    h1 Danh sách sản phẩm
+
+    .card.mb-3
+        .card-header
+            | Bộ lọc và tìm kiếm 
+        .card-body
+            .row 
+                .col-6
+                    +button-status(filterStatus)
+                .col-6 
+                    +search(keyword)
+
+    
+    .card.mb-3
+        .card-header Sắp xếp 
+        .card-body 
+            .row 
+                .col-4 
+                    +sort-select()
+
+
+    .card.mb-3 
+        .card-header Danh sách 
+            .card-body
+                .row    
+                    .col-8
+                        +form-change-multi(prefixAdmin)
+                    .col-4 
+                        a(
+                            href=`${prefixAdmin}/products/create`
+                            class="btn btn-outline-success"
+                        ) + Thêm mới 
+                        
+                table(
+                    class="table table-hover table-sm table-bordered"
+                    checkbox-multi
+                )
+                    thead
+                        tr  
+                            th.text-center.align-middle
+                                input(type="checkbox" name="checkall")
+                            th.text-center.align-middle STT 
+                            th.text-center.align-middle Hình ảnh 
+                            th.text-center.align-middle Mã sản phẩm
+                            th.text-center.align-middle Tiêu đề
+                            th.text-center.align-middle Còn lại
+                            th.text-center.align-middle Đã bán
+                            th.text-center.align-middle Trạng thái 
+                            th.text-center.align-middle Người tạo
+                            th.text-center.align-middle Người cập nhật
+                            th.text-center.align-middle Hành động
+                    tbody
+                        each item, index in products
+                            tr
+                                td.text-center.align-middle
+                                     input(type="checkbox" name="id"
+                                     value=item.id)
+                                td.text-center.align-middle #{objectPagination.limitProduct * (objectPagination.currentPage - 1) + (index + 1)}
+                                td.text-center.align-middle 
+                                    img(
+                                        src=item.thumbnail, 
+                                        alt=item.title,
+                                        width= "100px",
+                                        height= "80px"
+                                        )
+                                td.text-center.align-middle #{item.full_code || ""}
+                                td.text-center.align-middle #{item.title}
+                                td.text-center.align-middle #{item.stock} 
+                                th.text-center.align-middle #{item.sold}
+                                td.text-center.align-middle 
+                                    if(item.status == "active")
+                                        a(
+                                            href="javascript:;"
+                                            data-status="active"
+                                            data-id=item.id
+                                            button-change-status
+                                            class="badge badge-success"
+                                        ) Hoạt động
+                                    else 
+                                        a(
+                                            href="javascript:;"
+                                            data-status="inactive"
+                                            data-id=item.id
+                                            button-change-status
+                                            class="badge badge-danger"
+                                        ) Dừng hoạt động
+                                td.text-center.align-middle 
+                                    p #{item.accountFullName} 
+                                    p
+                                        +formatDateTime(item.createdBy.createdAt)
+                                td.text-center.align-middle
+                                    - const updatedBy = item.updatedBy[item.updatedBy.length-1];
+                                    if(updatedBy)
+                                        p #{updatedBy.accountFullName} 
+                                        p
+                                            +formatDateTime(updatedBy.updatedAt)
+                                td.text-center.align-middle  
+                                    a(  
+                                        href=`${prefixAdmin}/products/detail/${item.id}`
+                                        class="btn btn-secondary btn-sm"
+                                        type='button'
+                                    ) Chi tiết
+                                    a(  
+                                        href=`${prefixAdmin}/products/edit/${item.id}`
+                                        class="btn btn-danger btn-sm"
+                                        type='button'
+                                    ) Sửa
+                                    button(
+                                            class="btn btn-warning btn-sm ml-1"
+                                            data-id=item.id
+                                            button-delete
+                                        ) Xóa
+
+    nav
+        +navigation(objectPagination)
+    form(  
+        action=""
+        form-change-status 
+        method="POST"  
+        path=`${prefixAdmin}/products/change-status`
+        ) 
+
+    form(  
+        action=""
+        form-delete-item
+        method="POST"  
+        path=`${prefixAdmin}/products/delete`
+        ) 
+
+    script(src="/admin/js/products.js")

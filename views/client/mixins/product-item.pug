@@ -1,0 +1,30 @@
+mixin product-item(item, className)
+    .col-3.mb-3(class=className)
+        .product-item 
+            .inner-image 
+                img(src=item.thumbnail, alt=item.title)
+                if item.featured == "1"
+                    .inner-featured HOT
+            .inner-content 
+                a(href=`/products/detail/${item.slug}`).inner-title #{item.title}
+                .inner-price-old Giá: #{item.price.toLocaleString('vi-VN')} VNĐ
+                .inner-discount -#{item.discountPercentage}%
+                .inner-price-new Giá KM : #{item.newPrice.toLocaleString('vi-VN')} VNĐ
+
+            .inner-add-to-cart 
+                form(
+                        action=`/cart/add/${item.id}`
+                        method="POST"
+                    )
+                    input(
+                            class="form-control mb-2"
+                            type="number"
+                            name="quantity"
+                            value="1"
+                            min="1"
+                            max=item.stock
+                        )
+                    button(
+                            type="submit"
+                            class="btn btn-inline-block"
+                        ) <i class="fa-solid fa-bag-shopping"></i> THÊM VÀO GIỎ 

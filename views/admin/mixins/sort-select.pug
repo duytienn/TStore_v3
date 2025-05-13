@@ -1,0 +1,16 @@
+mixin sort-select()
+    div(sort)
+        select(
+            name="sort"
+            class="form-control"
+            sort-select
+            ) 
+            option(disabled selected) -- Sắp xếp --
+            //- option(value="position-desc") Vị trí giảm dần 
+            //- option(value="position-asc") Vị trí tăng dần
+            option(value="price-desc") Giá giảm dần
+            option(value="price-asc") Giá tăng dần
+            option(value="title-asc") Tiêu đề A-Z
+            option(value="title-desc") Tiêu đề Z-A
+            option(value="sold-desc") Số lượng bán giảm dần
+            option(value="sold-asc") Số lượng bán tăng dần  

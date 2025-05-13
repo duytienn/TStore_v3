@@ -1,0 +1,59 @@
+extends ../../layouts/default.pug 
+include ../../mixins/box-head.pug 
+include ../../mixins/alert.pug
+include ../../mixins/moment.pug
+
+block main 
+    +alert-success()
+
+    .container.my-3 
+        .row 
+            .col-12 
+                +box-head("LỊCH SỬ ĐẶT HÀNG")
+    
+    .container-order
+        .order-history
+            each order, index in orders
+                .order-card
+                    .order-header
+                        h4 Đơn hàng số #{index+1} 
+                            h5
+                                +formatDateTime(order.createdAt)
+                        if order.status === "pending"
+                            span.status.pending Chờ xử lý
+                        else if order.status === "delivering"
+                            span.status.delivering Đang giao hàng
+                        else if order.status === "success"
+                            span.status.success Thành công
+                        else 
+                            span.status.refuse Từ chối
+                    .order-details
+                        each product in order.products
+                            .product
+                                img(src=product.productInfo.thumbnail, alt=product.productInfo.title)
+                                .product-info
+                                    p
+                                        strong Tên sản phẩm: 
+                                        | #{product.productInfo.title}
+                                    p
+                                        strong Số lượng: 
+                                        | #{product.quantity}
+                                    p
+                                        strong Giá tiền: 
+                                        | #{product.productInfo.newPrice.toLocaleString('vi-VN')} VNĐ
+                    .action-buttons
+                        p.total-price Tổng tiền: #{order.totalPrice.toLocaleString('vi-VN')} VNĐ
+                        if order.status === "pending"
+                            button(
+                                class="btn-cancel"
+                                data-id=order.id
+                            ) Hủy đơn hàng <i class="fa-solid fa-trash"></i>
+    form(
+        action=""
+        form-cancel-order
+        method="POST"
+        path="/user/order-history/delete"
+    )
+
+    script(src="/js/order-history.js") 
+

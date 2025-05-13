@@ -1,0 +1,100 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+
+block main 
+
+    +alert-error()
+
+    h1(class="mb-4") Thêm mới tài khoản
+
+    form(
+        action=`${prefixAdmin}/accounts/create`
+        id="form-create-product"
+        method="POST"
+        enctype="multipart/form-data"
+    )
+        div(class="form-group" style="width: 95%")
+            label(for="fullName") Họ tên
+            input(
+                type="text"
+                id="fullName"
+                name="fullName"
+                class="form-control"
+                required
+            ) 
+        div(class="form-group" style="width: 95%")
+            labe(for="email") Email 
+            input(
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                required
+                ) 
+        div(class="form-group" style="width: 95%")
+            label(for="password") Mật khẩu
+            input(
+                type="password"
+                id="password"
+                class="form-control"
+                name="password"
+                require
+                )
+        div(class="form-group" style="width: 95%")
+            label(for="phone") Số điện thoại
+                input(
+                    type="text"
+                    id="phone"
+                    class="form-control"
+                    name="phone"
+                    require
+                )
+        div(
+            class="form-group" 
+            style="width: 95%"
+            upload-image
+            )
+            label(for="avatar") Ảnh
+            input(
+                type="file"
+                class="form-control-file"
+                id="avatar"
+                name="avatar"
+                accept="image/*"
+                choose-img
+                )
+            img(src="", alt="your-image" preview-img)
+            div(remove-preview class="hidden-remove") Bỏ chọn
+        div(class="form-group")
+            label(for="role_id") Phân quyền 
+            select(name="role_id" id="role_id" class = "form-control")
+                option(disabled selected) -- Chọn -- 
+                each item in roles
+                    option(value=item.id) #{item.title} 
+                
+        div(class="form-group form-check form-check-inline")
+            input(
+                type="radio"
+                class="form-check-input"
+                id="statusActive"
+                name="status"
+                value="active"
+                checked
+            )
+            label(for="statusActive" class="form-check-label") Hoạt động
+        div(class="form-group form-check form-check-inline")
+            input(
+                type="radio"
+                class="form-check-input"
+                id="statusInActive"
+                name="status"
+                value="inactive"
+            ) 
+            label(for="statusInActive" class="form-check-label") Dừng hoạt động
+        div(class="form-group")
+            button(
+                type="submit"
+                class="btn btn-primary"
+            ) Tạo mới
+
+    script(src="/admin/js/products.js")

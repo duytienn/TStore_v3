@@ -1,0 +1,35 @@
+extends ../../layouts/auth.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-error()
+
+    .login-page
+        .login-card
+            h2 Đăng nhập
+            h3 Nhập thông tin xác thực của bạn
+            form.login-form(
+                action=`${prefixAdmin}/auth/login`
+                method="POST"
+            )
+                div.form-group
+                    input.form-control(
+                        type="text"
+                        placeholder="Tên đăng nhập"
+                        id="email"
+                        name="email"
+                        required
+                    )
+                div.form-group
+                    input.form-control(
+                        type="password"
+                        placeholder="Mật khẩu"
+                        id="password"
+                        name="password"
+                        required
+                    )
+                div.form-group
+                    button.btn.btn-primary.btn-block(type="submit") Đăng nhập
+
+             
+

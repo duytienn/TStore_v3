@@ -1,0 +1,33 @@
+extends ../../layouts/default.pug 
+include ../../mixins/box-head.pug
+include ../../mixins/product-layout.pug
+include ../../mixins/sort-select.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-success()
+    
+    include ../../partials/swiperintroduce.pug
+    .container.my-3.hot
+        .row 
+            .col-12 
+                +box-head("⚡️ Sản phẩm bán chạy 🔥")
+        +product-grid(productsFeatured)
+
+    hr
+    include ../../partials/swiperwatch.pug
+    .container.my-3
+        .row 
+            .col-8
+                +box-head("Sản phẩm mới")
+            .col-4
+                +sort-select()
+        +product-grid(productsNew)
+        if(productsNew.length > 4)
+            button#see-more-btn Xem thêm sản phẩm
+    hr
+    .container.my-3 
+        .row 
+            .col-12 
+            +box-head("Địa chỉ")
+    include ../../partials/address.pug

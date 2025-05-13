@@ -1,0 +1,78 @@
+extends ../../layouts/default.pug 
+include ../../mixins/box-head.pug
+include ../../mixins/alert.pug
+
+block main 
+    +alert-success()
+    +alert-error()
+
+    .container.my-3 
+        .row 
+            .col-12 
+                +box-head("Đặt hàng thành công")
+
+        .row 
+            .col-12 
+                div(class="alert alert-success")
+                    | Chúc mừng bạn đã đặt hàng thành công ! Chúng tôi sẽ xử lý đơn hàng của bạn trong thời gian sớm nhất.
+        
+        if(order)
+            .row 
+                .col-12 
+                    h4(class="mb-2") Thông tin cá nhân
+                    table(class="table table-bordered")
+                        tbody 
+                            tr 
+                                td Họ tên 
+                                td 
+                                    b #{order.userInfo.fullName} 
+                            tr 
+                                td Số điện thoại 
+                                td 
+                                    b #{order.userInfo.phone}
+                            tr 
+                                td Địa chỉ 
+                                td 
+                                    b #{order.userInfo.address}
+            .row 
+                .col-12 
+                    table(class="table table-bordered")
+                        thead 
+                            tr 
+                                th STT
+                                th Ảnh
+                                th Tên
+                                //- th Giá
+                                th Số lượng
+                                //- th Tổng tiền
+                        tbody
+                            if(order.products.length > 0) 
+                                each item, index in order.products
+                                    tr 
+                                        td #{index + 1}
+                                        td 
+                                            img(
+                                                src=item.productInfo.thumbnail 
+                                                alt=item.productInfo.title
+                                                width="80px"
+                                            )
+                                        td
+                                            // tên sản phẩm
+                                            | #{item.productInfo.title}
+                                            // nếu có màu thì hiển thị
+                                            if item.color
+                                                small.d-block Màu: #{item.color}
+                                            // nếu có bộ nhớ thì hiển thị
+                                            if item.memory
+                                                small.d-block Bộ nhớ: #{item.memory}GB
+                                        //- td #{item.newPrice.toLocaleString('vi-VN')} VNĐ
+                                        td #{item.quantity}
+                                        //- td #{item.totalPrice.toLocaleString('vi-VN')} VNĐ 
+
+                            else 
+                                tr 
+                                    td(
+                                        colspan="7"
+                                        class="text-center"
+                                    )   Giỏ hàng trống
+                    //- ?h3(class="text-right") Tổng đơn hàng : #{order.totalPrice.toLocaleString('vi-VN')} VNĐ

@@ -1,0 +1,86 @@
+extends ../../layouts/default.pug
+include ../../mixins/alert.pug
+include ../../mixins/moment.pug
+
+block main 
+
+    +alert-success()
+
+    h1(class="mb-4") Đơn hàng
+
+    .card.mb-3 
+        .card-header 
+            .card-body
+                table(
+                    class="table table-hover table-sm mt-3 table-bordered"
+                )
+                    thead 
+                        tr 
+                            th.text-center.align-middle STT 
+                            th.text-center.align-middle Tên người đặt hàng
+                            th.text-center.align-middle Sản phẩm
+                            th.text-center.align-middle Giá tiền 
+                            th.text-center.align-middle Phương thức thanh toán
+                            th.text-center.align-middle Địa chỉ
+                            th.text-center.align-middle Thời gian đặt
+                            th.text-center.align-middle Trạng thái
+                    tbody 
+                        each order, index in orders 
+                            tr 
+                                td.text-center.align-middle #{index + 1} 
+                                td.text-center.align-middle #{order.userInfo.fullName}
+                                td.align-middle
+                                    each item, index in order.products
+                                        .d-flex.justify-content-between.mb-2
+                                            .text-start
+                                                | #{item.productInfo.title}
+                                                .small.text-muted
+                                                    if item.color && item.memory
+                                                        | Màu: #{item.color}, Bộ nhớ: #{item.memory}GB
+                                                    else if item.color
+                                                        | Màu: #{item.color}
+                                                    else if item.memory
+                                                        | Bộ nhớ: #{item.memory}GB
+
+                                            .text-end
+                                                | Số lượng: #{item.quantity}
+                                        
+                                        if index < order.products.length - 1
+                                            hr.my-2
+
+
+                                td.text-center.align-middle #{order.totalPrice.toLocaleString('vi-VN')} VNĐ
+                                td.text-center.align-middle 
+                                    - var pm = order.paymentMethod
+                                    if pm === 'cod'
+                                        | COD
+                                    else if pm === 'qr'
+                                        | QR
+                                    else if pm === 'crypto'
+                                        | Crypto
+                                    else
+                                        | #{pm}
+                                td.text-center.align-middle #{order.userInfo.address}
+                                td.text-center.align-middle
+                                    +formatDateTime(order.createdAt)
+                                td.text-center.align-middle
+                                    select(
+                                        data-id=order.id
+                                        name="order-status"
+                                        id="order-status-select"
+                                        order-status-select
+                                    )
+                                        option(class="badge badge-info" value="delivering" selected=(order.status === "delivering")) Đang giao hàng
+                                        option(class="badge badge-success" value="success" selected=(order.status === "success")) Thành công
+                                        option(class="badge badge-danger" value="refuse" selected=(order.status === "refuse")) Từ chối
+                                        option(class="badge badge-warning" value="pending" selected=(order.status === "pending")) Chờ xử lý
+
+    form(
+        action=""
+        form-change-statusOrder 
+        method="POST"
+        path=`${prefixAdmin}/orders/change-status`
+    )
+
+    script(src="/admin/js/orders.js")
+

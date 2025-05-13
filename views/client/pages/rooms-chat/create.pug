@@ -1,0 +1,39 @@
+extends ../../layouts/default.pug 
+include ../../mixins/box-head.pug
+
+block main 
+    .container.my-3 
+        .row 
+            .col-12 
+                +box-head(pageTitle)
+ 
+            .col-12 
+                form(
+                    action='/rooms-chat/create'
+                    method='POST'
+                    class="p-4 border rounded shadow-sm bg-light"
+                )
+                    .mb-3
+                        label.form-label(for="title") Tiêu đề phòng
+                        input.form-control(
+                            type="text"
+                            id="title"
+                            name="title"
+                            placeholder="Nhập tiêu đề phòng"
+                            required
+                        )
+                    .mb-3
+                        label.form-label Thêm thành viên
+                        each friend in friendList
+                            .form-check.mb-2
+                                input.form-check-input(
+                                    type="checkbox"
+                                    value=friend.user_id
+                                    id=`user-${friend.user_id}`
+                                    name="userId"
+                                )
+                                label.form-check-label(
+                                    for=`user-${friend.user_id}`
+                                ) #{friend.infoFriend.fullName}
+                    .d-flex.justify-content-end
+                        button.btn.btn-primary(type="submit") Tạo phòng

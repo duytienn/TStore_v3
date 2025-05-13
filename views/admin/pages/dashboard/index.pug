@@ -1,0 +1,107 @@
+extends ../../layouts/default.pug
+
+block main
+  //- chèn CSS inline
+  style(type="text/css"). 
+    .tabs {
+      display: flex;
+      gap: 10px;
+    }
+    .tab-button {
+      padding: 5px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 14px;
+      color: #4b5563;
+      background-color: #f3f4f6;
+      transition: all 0.2s ease;
+    }
+    .tab-button:hover {
+      background-color: #e5e7eb;
+    }
+    .tab-button.active {
+      color: white;
+      background-color: #0891b2;
+    }
+    @media (max-width: 768px) {
+      .bottom-container {
+        flex-direction: column;
+      }
+      .prog-status {
+        width: 100%;
+        margin-bottom: 20px;
+      }
+    }
+    .item h3 {
+      color: #0891b2;
+      font-weight: bold;
+    }
+    .item {
+      transition: all 0.2s;
+      border-radius: 8px;
+    }
+    .item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+  //- phần nội dung chính của bạn
+  div.top-container
+    div.status
+      div.header
+        h4#big Các danh mục
+      div.items-list
+        div.item
+          div.info
+            div
+              h5 Danh mục sản phẩm
+              p - Tổng số danh mục : #{statistic.categoryProduct.total}
+              p - Số danh mục hoạt động : #{statistic.categoryProduct.active}
+              p - Số danh mục ngừng hoạt động : #{statistic.categoryProduct.inactive}
+        div.item
+          div.info
+            div
+              h5 Sản phẩm
+              p - Tổng số sản phẩm : #{statistic.product.total}
+              p - Số sản phẩm hoạt động: #{statistic.product.active}
+              p - Số sản phẩm ngừng hoạt động : #{statistic.product.inactive}
+        div.item
+          div.info
+            div
+              h5 Đơn hàng
+              p - Tổng số đơn hàng : #{statistic.order.total}
+              p - Số đơn hàng được đặt: #{statistic.order.active}
+              p - Số đơn hàng bị hủy : #{statistic.order.inactive}
+        div.item
+          div.info
+            div
+              h5 Doanh thu 
+              h3 #{totalRevenue} VNĐ
+
+  div.bottom-container
+    div.prog-status
+      div.header
+        h4 Biểu đồ doanh thu
+        div.tabs
+          a.tab-button.active(href="#" data-period="year") 1 năm
+          a.tab-button(href="#" data-period="month") 1 tháng
+          a.tab-button(href="#" data-period="week") 1 tuần
+      canvas.prog-chart
+    div.prog-status
+      div.header
+        h4 Biểu đồ top sản phẩm bán chạy
+        div.tabs
+      canvas.prog-chart2
+
+  //- Dữ liệu doanh thu
+  span(id="monthly-revenue-data" data-revenue=monthlyRevenue style="display: none;")
+  span(id="daily-revenue-data" data-revenue=dailyRevenue style="display: none;")
+  span(id="weekly-revenue-data" data-revenue=weeklyRevenue style="display: none;")
+
+  //- Dữ liệu sản phẩm bán chạy
+  each product in productFeatured
+    div.product(data-product=product.sold)
+    div.product(data-title=product.title)
+
+  script(src="https://cdn.jsdelivr.net/npm/chart.js")
+  script(src="/admin/js/dashboard.js")
