@@ -1,25 +1,16 @@
 const dashboardRoutes = require("./dashboard.router");
-
 const productsRoutes = require("./products.router");
-
 const categoryRoutes = require("./products-category.router");
-
 const roleRoutes = require("./roles.router");
-
 const authRoutes = require("./auth.route");
-
 const accountRoutes = require("./account.route");
-
 const myAccountdRoutes = require("./my-account.route");
-
 const settingRoutes = require("./setting.route");
-
 const orderRoutes = require("./orders.route");
+const exportRoutes = require("./export.route");
 
 const authMiddleware = require("../../middlewares/admin/auth.middlewares");
-
 const systemConfig = require("../../config/system");
-
 
 module.exports = (app) => {
     const PATH_ADMIN = systemConfig.prefixAdmin;
@@ -72,5 +63,11 @@ module.exports = (app) => {
         PATH_ADMIN + "/orders",
         authMiddleware.requireAuth,
         orderRoutes
-    )
+    );
+
+    app.use(
+        PATH_ADMIN + "/exports",
+        authMiddleware.requireAuth,
+        exportRoutes
+    );
 }

@@ -36,43 +36,46 @@ module.exports.patchStatus = async (req, res) => {
     );
 
     if (status === "success") {
-      const order = await Order.findOne({
-        _id: id,
-      });
-      const products = order.products;
-      for (const product of products) {
-        const productInOrder = await Product.findOne({
-          _id: product.product_id,
-        });
+      const order = await Order.findOne({ _id: id }).populate('products.product_id');
+
+      for (const product of order.products) {
+        const productInOrder = product.product_id;
+
+        if (!productInOrder) continue; // Bỏ qua nếu không tìm thấy sản phẩm
+
         const newStock = parseInt(productInOrder.stock - product.quantity);
         const newSold = parseInt(productInOrder.sold + product.quantity);
-        
-        // Cập nhật stock, sold cho sản phẩm chính
+
         const updateData = {
           stock: newStock,
           sold: newSold,
         };
-        
+
         // Cập nhật stock cho biến thể tương ứng nếu có
         if (product.color || product.memory) {
-          // Tìm và cập nhật biến thể phù hợp
           const variantIndex = productInOrder.variants.findIndex(variant => 
             ((!product.color || variant.color === product.color) && 
-             (!product.memory || variant.memory === product.memory))
+            (!product.memory || variant.memory === product.memory))
           );
-          
+
           if (variantIndex !== -1) {
             const updatePath = `variants.${variantIndex}.stock`;
             updateData[updatePath] = productInOrder.variants[variantIndex].stock - product.quantity;
           }
         }
-        
+
         await Product.updateOne(
-          { _id: product.product_id },
-          updateData
+          { _id: product.product_id._id },
+          { $set: updateData }
         );
       }
+
+      // Ví dụ: Tính doanh thu tổng từ đơn hàng (nếu cần)
+      // const revenue = order.products.reduce((total, product) => {
+      //   return total + product.newPrice * product.quantity;
+      // }, 0);
     }
+
 
     req.flash("success", "Cập nhật trạng thái thành công!");
     res.redirect("back");

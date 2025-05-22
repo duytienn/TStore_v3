@@ -9,6 +9,8 @@ const controller = require("../../controllers/admin/products-category.controller
 const validates = require("../../validates/admin/products-category.validates");
 const uploadCloud = require("../../middlewares/admin/uploadCloud.middlewares");
 
+router.get('/api/check-code', controller.checkCategoryCode);
+
 router.get("/", controller.index);
 
 router.get("/create", controller.create);

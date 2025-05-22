@@ -17,18 +17,79 @@ document.addEventListener("DOMContentLoaded", function() {
         return defaultData;
       }
     }
-    console.warn(`Không tìm thấy dữ liệu cho ${elementId}`);
+    console.warn(`Không tìm thấy dữ liệu cho ${elementId}, sử dụng dữ liệu mặc định`);
     return defaultData;
   }
 
-  // Lấy dữ liệu doanh thu theo các khoảng thời gian - di chuyển xuống đây để đảm bảo DOM đã load
-  const monthlyRevenueData = getRevenueData("monthly-revenue-data", 12); // 12 tháng
-  const dailyRevenueData = getRevenueData("daily-revenue-data", 30);     // 30 ngày
-  const weeklyRevenueData = getRevenueData("weekly-revenue-data", 7);    // 7 ngày
+  // Hàm lấy ngày giờ hiện tại theo UTC+7
+  function getCurrentDateTimeUTC7() {
+    // Tạo một đối tượng Date mới (theo giờ địa phương của người dùng)
+    const now = new Date();
+    
+    // Tính toán múi giờ UTC+7
+    // Lấy độ lệch múi giờ hiện tại của người dùng so với UTC (tính bằng phút)
+    const userTimezoneOffset = now.getTimezoneOffset();
+    
+    // Múi giờ UTC+7 có độ lệch là -420 phút so với UTC (7 giờ * 60 phút)
+    const utc7Offset = -420;
+    
+    // Tính chênh lệch giữa múi giờ hiện tại và UTC+7 (tính bằng phút)
+    const offsetDiff = userTimezoneOffset + utc7Offset;
+    
+    // Tạo một đối tượng Date mới với thời gian đã điều chỉnh
+    const utc7DateTime = new Date(now.getTime() + offsetDiff * 60 * 1000);
+    
+    return utc7DateTime;
+  }
   
-  console.log("Dữ liệu doanh thu theo tháng:", monthlyRevenueData);
-  console.log("Dữ liệu doanh thu theo ngày:", dailyRevenueData);
-  console.log("Dữ liệu doanh thu theo tuần:", weeklyRevenueData);
+  // Hàm tạo nhãn ngày cho biểu đồ
+  function generateDateLabels(period) {
+    const utc7Now = getCurrentDateTimeUTC7();
+    const labels = [];
+    
+    switch(period) {
+      case 'year':
+        // Tạo nhãn cho các tháng trong năm
+        for (let i = 0; i < 12; i++) {
+          labels.push(`T${i+1}`);
+        }
+        break;
+        
+      case 'month':
+        // Xác định số ngày trong tháng hiện tại
+        const currentMonth = utc7Now.getMonth();
+        const currentYear = utc7Now.getFullYear();
+        // Lấy ngày cuối cùng của tháng hiện tại
+        const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+        
+        // Tạo nhãn cho mỗi ngày trong tháng
+        for (let i = 1; i <= lastDay; i++) {
+          labels.push(`${i}`);
+        }
+        break;
+        
+      case 'week':
+        // Tên các ngày trong tuần theo tiếng Việt
+        const weekdays = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
+        
+        // Lấy ngày hiện tại và tính toán ngày đầu tuần (Thứ 2)
+        const currentDayOfWeek = utc7Now.getDay(); // 0 = Chủ nhật, 1 = Thứ hai, ...
+        const startOfWeekOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek; // Đưa về thứ 2
+        
+        // Tạo nhãn cho 7 ngày trong tuần
+        for (let i = 0; i < 7; i++) {
+          const day = new Date(utc7Now);
+          day.setDate(utc7Now.getDate() + startOfWeekOffset + i);
+          // Thêm ngày/tháng vào nhãn
+          const dayOfMonth = day.getDate();
+          const month = day.getMonth() + 1;
+          labels.push(`${weekdays[i === 6 ? 0 : i+1]} (${dayOfMonth}/${month})`);
+        }
+        break;
+    }
+    
+    return labels;
+  }
 
   // Hàm tạo biểu đồ doanh thu
   function createRevenueChart(period = 'year') {
@@ -50,28 +111,74 @@ document.addEventListener("DOMContentLoaded", function() {
       title: ""
     };
     
+    // Lấy dữ liệu doanh thu theo các khoảng thời gian từ các thẻ data
+    const monthlyRevenueData = getRevenueData("monthly-revenue-data", 12); // 12 tháng
+    const dailyRevenueData = getRevenueData("daily-revenue-data", 31); // 31 ngày
+    
+    console.log("Dữ liệu doanh thu theo tháng:", monthlyRevenueData);
+    console.log("Dữ liệu doanh thu theo ngày:", dailyRevenueData);
+    
+    // Lấy múi giờ UTC+7 hiện tại
+    const utc7Now = getCurrentDateTimeUTC7();
+    
+    // Xác định ngày trong tháng
+    const currentDate = utc7Now.getDate();
+    // Xác định ngày trong tuần (0 = CN, 1 = T2, ...)
+    const currentDayOfWeek = utc7Now.getDay();
+    // Tính offset để lấy ngày đầu tuần (thứ 2)
+    const startOfWeekOffset = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+    
     switch(period) {
       case 'year':
-        chartData.labels = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"];
+        chartData.labels = generateDateLabels('year');
         chartData.data = monthlyRevenueData;
         chartData.title = "Doanh thu theo tháng";
         break;
       case 'month':
-        // Tạo labels cho từng ngày trong tháng
-        chartData.labels = Array.from({length: dailyRevenueData.length}, (_, i) => `${i + 1}`);
-        chartData.data = dailyRevenueData;
-        chartData.title = "Doanh thu theo ngày trong tháng";
+        // Tạo nhãn cho các ngày trong tháng
+        chartData.labels = generateDateLabels('month');
+        chartData.data = dailyRevenueData.slice(0, chartData.labels.length);
+        chartData.title = `Doanh thu tháng ${utc7Now.getMonth() + 1}/${utc7Now.getFullYear()} (UTC+7)`;
         break;
       case 'week':
-        // Lấy tên các ngày trong tuần
-        const weekdays = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
-        chartData.labels = weekdays;
+        // Tạo nhãn cho các ngày trong tuần
+        chartData.labels = generateDateLabels('week');
+        
+        // Tạo mảng chứa dữ liệu doanh thu cho tuần
+        let weeklyRevenueData = Array(7).fill(0);
+        
+        // Xác định các ngày trong tuần hiện tại để lấy dữ liệu chính xác từ dữ liệu theo ngày
+        for (let i = 0; i < 7; i++) {
+          const weekDay = new Date(utc7Now);
+          weekDay.setDate(utc7Now.getDate() + startOfWeekOffset + i);
+          const dayOfMonth = weekDay.getDate(); // Ngày trong tháng
+          
+          // Lấy dữ liệu từ mảng dailyRevenueData (chỉ số mảng bắt đầu từ 0, ngày bắt đầu từ 1)
+          if (dayOfMonth >= 1 && dayOfMonth <= dailyRevenueData.length) {
+            weeklyRevenueData[i] = dailyRevenueData[dayOfMonth - 1];
+          }
+        }
+        
         chartData.data = weeklyRevenueData;
-        chartData.title = "Doanh thu theo ngày trong tuần";
+        chartData.title = "Doanh thu tuần hiện tại (UTC+7)";
         break;
     }
 
-    console.log(`Đang tạo biểu đồ cho giai đoạn: ${period}`, chartData);
+    console.log(`Đang tạo biểu đồ cho giai đoạn: ${period} (UTC+7)`, chartData);
+    
+    // Thêm thông tin UTC+7 vào tiêu đề
+    const timeInfoElement = document.querySelector(".time-info");
+    if (timeInfoElement) {
+      const options = { 
+        weekday: 'long', 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      timeInfoElement.textContent = `Dữ liệu cập nhật: ${utc7Now.toLocaleDateString('vi-VN', options)} (UTC+7)`;
+    }
     
     // Tạo biểu đồ mới
     revenueChart = new Chart(ctx, {

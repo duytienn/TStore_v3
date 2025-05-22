@@ -44,6 +44,38 @@ block main
       transform: translateY(-3px);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     }
+    .export-section {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f9fafb;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+    .export-section h4 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #111827;
+    }
+    .export-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background-color: #0891b2;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .export-btn:hover {
+      background-color: #0e7490;
+      transform: translateY(-2px);
+    }
+    .export-btn i {
+      font-size: 16px;
+    }
 
   //- phần nội dung chính của bạn
   div.top-container
@@ -77,6 +109,14 @@ block main
             div
               h5 Doanh thu 
               h3 #{totalRevenue} VNĐ
+
+  //- Thêm khu vực xuất báo cáo
+  div.export-section
+    h4 Báo cáo bán hàng
+    p Xuất báo cáo chi tiết sản phẩm bán được trong khoảng thời gian tùy chọn
+    a.export-btn(href="/admin/exports/orders")
+      i.fas.fa-file-export
+      | Xuất báo cáo bán hàng
 
   div.bottom-container
     div.prog-status

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
 const orderSchema = new mongoose.Schema({
     user_id: String,
@@ -10,12 +11,15 @@ const orderSchema = new mongoose.Schema({
     },
     products: [
         {
-            product_id: String,
+            product_id: {
+                type: String,
+                ref: 'Product'
+            },
             price: Number,
             discountPercentage: Number,
             quantity: Number,
-            color: String,    // Thêm trường này
-            memory: Number    // Thêm trường này
+            color: String,
+            memory: Number
         },
     ],
     paymentMethod: {

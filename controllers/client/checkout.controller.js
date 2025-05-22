@@ -99,6 +99,7 @@ module.exports.order = async (req, res) => {
 
   let products = [];
 
+  // Trong các phương thức xử lý đơn hàng
   for (const item of cart.products) {
     const objectProducts = {
       product_id: item.product_id,
@@ -111,9 +112,28 @@ module.exports.order = async (req, res) => {
     const productInfo = await Product.findOne({
       _id: item.product_id,
     });
-    objectProducts.price = productInfo.price;
+    
+    // Lấy giá của biến thể cụ thể nếu có
+    if ((item.color || item.memory) && productInfo.variants && productInfo.variants.length > 0) {
+      // Tìm biến thể phù hợp
+      const variant = productInfo.variants.find(v => 
+        (!item.color || v.color === item.color) && 
+        (!item.memory || v.memory === item.memory)
+      );
+      
+      // Nếu tìm thấy biến thể, sử dụng giá của nó
+      if (variant && variant.price) {
+        objectProducts.price = variant.price;
+        // Lưu giá đã tính cho biến thể để sử dụng sau này
+        objectProducts.newPrice = variant.price * (1 - (productInfo.discountPercentage || 0) / 100);
+      } else {
+        objectProducts.price = productInfo.price;
+      }
+    } else {
+      objectProducts.price = productInfo.price;
+    }
+    
     objectProducts.discountPercentage = productInfo.discountPercentage;
-
     products.push(objectProducts);
   }
   const objectOrder = {
@@ -155,21 +175,41 @@ module.exports.orderQr = async (req, res) => {
 
       let products = [];
 
+      // Trong các phương thức xử lý đơn hàng
       for (const item of cart.products) {
         const objectProducts = {
           product_id: item.product_id,
           price: 0,
           discountPercentage: 0,
           quantity: item.quantity,
-          color: item.color,      
+          color: item.color,        
           memory: item.memory 
         };
         const productInfo = await Product.findOne({
           _id: item.product_id,
         });
-        objectProducts.price = productInfo.price;
+        
+        // Lấy giá của biến thể cụ thể nếu có
+        if ((item.color || item.memory) && productInfo.variants && productInfo.variants.length > 0) {
+          // Tìm biến thể phù hợp
+          const variant = productInfo.variants.find(v => 
+            (!item.color || v.color === item.color) && 
+            (!item.memory || v.memory === item.memory)
+          );
+          
+          // Nếu tìm thấy biến thể, sử dụng giá của nó
+          if (variant && variant.price) {
+            objectProducts.price = variant.price;
+            // Lưu giá đã tính cho biến thể để sử dụng sau này
+            objectProducts.newPrice = variant.price * (1 - (productInfo.discountPercentage || 0) / 100);
+          } else {
+            objectProducts.price = productInfo.price;
+          }
+        } else {
+          objectProducts.price = productInfo.price;
+        }
+        
         objectProducts.discountPercentage = productInfo.discountPercentage;
-
         products.push(objectProducts);
       }
       const objectOrder = {
@@ -177,6 +217,7 @@ module.exports.orderQr = async (req, res) => {
         cart_id: cartId,
         userInfo: userInfo,
         products: products,
+        paymentMethod: 'qr'
       };
 
       const order = new Order(objectOrder);
@@ -233,17 +274,40 @@ module.exports.orderCrypto = async (req, res) => {
 
     let products = [];
 
+    // Trong các phương thức xử lý đơn hàng
     for (const item of cart.products) {
       const objectProducts = {
         product_id: item.product_id,
         price: 0,
         discountPercentage: 0,
         quantity: item.quantity,
-        color: item.color,         
+        color: item.color,        
         memory: item.memory 
       };
-      const productInfo = await Product.findOne({ _id: item.product_id });
-      objectProducts.price = productInfo.price;
+      const productInfo = await Product.findOne({
+        _id: item.product_id,
+      });
+      
+      // Lấy giá của biến thể cụ thể nếu có
+      if ((item.color || item.memory) && productInfo.variants && productInfo.variants.length > 0) {
+        // Tìm biến thể phù hợp
+        const variant = productInfo.variants.find(v => 
+          (!item.color || v.color === item.color) && 
+          (!item.memory || v.memory === item.memory)
+        );
+        
+        // Nếu tìm thấy biến thể, sử dụng giá của nó
+        if (variant && variant.price) {
+          objectProducts.price = variant.price;
+          // Lưu giá đã tính cho biến thể để sử dụng sau này
+          objectProducts.newPrice = variant.price * (1 - (productInfo.discountPercentage || 0) / 100);
+        } else {
+          objectProducts.price = productInfo.price;
+        }
+      } else {
+        objectProducts.price = productInfo.price;
+      }
+      
       objectProducts.discountPercentage = productInfo.discountPercentage;
       products.push(objectProducts);
     }

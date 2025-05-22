@@ -38,40 +38,85 @@ module.exports.create = async (req, res) => {
     })
 }
 
+
+
+// [GET] admin/products-category/api/check-code
+module.exports.checkCategoryCode = async (req, res) => {
+  try {
+    const code = req.query.code ? req.query.code.toUpperCase().trim() : "";
+    const parentId = req.query.parentId || "";
+    
+    // Nếu không có mã, trả về true để cho phép tiếp tục
+    if (!code) {
+      return res.json({ available: true });
+    }
+    
+    let fullCode = code;
+    
+    // Nếu có parent ID, lấy full_code của danh mục cha
+    if (parentId) {
+      const parentCategory = await ProductCategory.findById(parentId);
+      if (parentCategory) {
+        fullCode = parentCategory.full_code + code;
+      }
+    }
+    
+    // Kiểm tra xem full_code đã tồn tại chưa
+    const existingCategory = await ProductCategory.findOne({ full_code: fullCode });
+    
+    res.json({ 
+      available: !existingCategory,
+      fullCode: fullCode
+    });
+  } catch (error) {
+    console.error("Error checking category code:", error);
+    res.status(500).json({ error: "Server error", available: false });
+  }
+};
+
+
+
 // [POST] admin/products-category/create
 module.exports.createPost = async (req, res) => {
-    try {
-        if (req.body.position == "") {
-            const count = await ProductCategory.countDocuments();
-            req.body.position = count + 1;
-        } else {
-            req.body.position = parseInt(req.body.position);
-        }
-
-        // Xử lý mã danh mục
-        req.body.code = req.body.code.toUpperCase().trim();
-        
-        // Nếu có danh mục cha, lấy full_code từ danh mục cha
-        if (req.body.paren_id && req.body.paren_id !== "") {
-            const parentCategory = await ProductCategory.findById(req.body.paren_id);
-            if (parentCategory) {
-                req.body.full_code = parentCategory.full_code + req.body.code;
-            } else {
-                req.body.full_code = req.body.code;
-            }
-        } else {
-            // Nếu không có danh mục cha, full_code = code
-            req.body.full_code = req.body.code;
-        }
-
-        const record = new ProductCategory(req.body);
-        await record.save();
-        res.redirect(`${configSystem.prefixAdmin}/products-category`);
-    } catch (error) {
-        console.error("Error creating category:", error);
-        req.flash('error', 'Không thể tạo danh mục. Vui lòng kiểm tra thông tin và thử lại.');
-        res.redirect(`${configSystem.prefixAdmin}/products-category/create`);
+  try {
+    if (req.body.position == "") {
+      const count = await ProductCategory.countDocuments();
+      req.body.position = count + 1;
+    } else {
+      req.body.position = parseInt(req.body.position);
     }
+
+    // Xử lý mã danh mục
+    req.body.code = req.body.code.toUpperCase().trim();
+    
+    // Nếu có danh mục cha, lấy full_code từ danh mục cha
+    if (req.body.paren_id && req.body.paren_id !== "") {
+      const parentCategory = await ProductCategory.findById(req.body.paren_id);
+      if (parentCategory) {
+        req.body.full_code = parentCategory.full_code + req.body.code;
+      } else {
+        req.body.full_code = req.body.code;
+      }
+    } else {
+      // Nếu không có danh mục cha, full_code = code
+      req.body.full_code = req.body.code;
+    }
+
+    // Kiểm tra xem full_code đã tồn tại chưa
+    const existingCategory = await ProductCategory.findOne({ full_code: req.body.full_code });
+    if (existingCategory) {
+      req.flash('error', 'Mã danh mục đã tồn tại. Vui lòng chọn mã khác.');
+      return res.redirect(`${configSystem.prefixAdmin}/products-category/create`);
+    }
+
+    const record = new ProductCategory(req.body);
+    await record.save();
+    res.redirect(`${configSystem.prefixAdmin}/products-category`);
+  } catch (error) {
+    console.error("Error creating category:", error);
+    req.flash('error', 'Không thể tạo danh mục. Vui lòng kiểm tra thông tin và thử lại.');
+    res.redirect(`${configSystem.prefixAdmin}/products-category/create`);
+  }
 }
 
 // [GET] admin/products-category/edit/:id

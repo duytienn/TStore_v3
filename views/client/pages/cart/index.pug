@@ -56,7 +56,7 @@ block main
                                     td #{item.totalPrice.toLocaleString('vi-VN')} VNĐ
                                     td 
                                         a(
-                                            href=`/cart/deleted/${item.product_id}`
+                                            href=`/cart/deleted/${item.product_id}?color=${item.color || ''}&memory=${item.memory || 0}`
                                             class="btn btn-danger"
                                         ) Xóa
 
@@ -72,4 +72,4 @@ block main
                 div.text-right.mt-3
                     a(href="/checkout/crypto" class="btn btn-warning btn-crypto") Thanh toán bằng Crypto
     script(src="/js/cart.js") 
-    script(src="/js/checkout-crypto.js")            
+    script(src="/js/checkout-crypto.js")
